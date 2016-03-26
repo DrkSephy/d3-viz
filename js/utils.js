@@ -6,11 +6,11 @@ module.exports = {
       request.get(url, { 'headers': {'User-Agent': 'DrkSephy' }},
         (error, response, body) => {
           if (body) {
-            resolve(JSON.parse(body))
-          } else {
-            resolve({});
-          }
-      });
+              resolve(JSON.parse(body));
+            } else {
+              resolve({});
+            }
+        });
     });
   }
 }
