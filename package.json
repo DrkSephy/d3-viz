@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/DrkSephy/oss-visualization",
   "dependencies": {
-    "request": "^2.69.0"
+    "request": "^2.69.0",
+    "d3": "~3.5.16"
   }
 }
