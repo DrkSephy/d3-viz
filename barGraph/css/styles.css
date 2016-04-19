@@ -1,0 +1,23 @@
+.chart div {
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;
+  height: 30px;
+}
+
+.text-tooltip {
+  display: none;
+  position: absolute;
+  margin: 1em 1em 0 0;
+  padding: 1em;
+  font-size: 1.0em;
+  background-color: #F2F2F2;
+  border: 1px solid #222222;
+}
+
+.chart text.name {
+  fill: #000;
+}
