@@ -3,7 +3,7 @@ body {
 }
 
 path { 
-  stroke-width: 2;
+  stroke-width: 3;
   fill: none;
 }
 
@@ -43,3 +43,9 @@ path {
   top: 100%;
   left: 0;
 }
+
+.legend {
+  font-size: 16px;  
+  font-weight: bold;
+  text-anchor: middle;
+} 

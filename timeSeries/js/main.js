@@ -1,23 +1,26 @@
-// Set the dimensions of the canvas / graph
-var margin = {top: 30, right: 20, bottom: 30, left: 50},
-    width = 600 - margin.left - margin.right,
-    height = 270 - margin.top - margin.bottom;
+var margin = {top: 75, right: 20, bottom: 70, left: 50}, 
+    width = 800 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;  
 
 // Color hash will be used for coloring each line
 var color_hash = {  
-  0 : ["#ff6961"],
-  1 : ['#61a8ff']
+  0 : ['#ff6961'],
+  1 : ['#61a8ff'],
+  2 : ['#61ffb8'],
+  3 : ['#917394']
 } 
 
 // Used for creating the legend
 // Colors correspond to the line color order
 var legend_hash = {
-  0 : ['Commits', "#ff6961"],
-  1 : ['Stars', '#61a8ff']
+  0 : ['Commits', '#ff6961'],
+  1 : ['Pull Requests', '#61a8ff'],
+  2 : ['Pull Request Comments', '#61ffb8'],
+  3 : ['Issues', '#917394']
 }
 
 // Parse the date / time
-var parseDate = d3.time.format("%b %d").parse; 
+var parseDate = d3.time.format('%b %d').parse; 
 
 // Set the ranges
 var x = d3.time.scale().range([0, width]);
@@ -25,23 +28,24 @@ var y = d3.scale.linear().range([height, 0]);
 
 // Define the axes
 var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(5);
+    .orient('bottom').ticks(5);
 
 var yAxis = d3.svg.axis().scale(y)
-    .orient("left").ticks(5);
+    .orient('left').ticks(5);
 
 // Define the line object
 var line = d3.svg.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.count); })
     
-// Add the svg canvas
-var svg = d3.select("body")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+// Adds the svg canvas
+var svg = d3.select('body')
+    .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+        .attr('transform', 
+              'translate(' + margin.left + ',' + margin.top + ')');
 
 // Load our dataset
 d3.json('weekly.json', function(err, data) {
@@ -63,10 +67,11 @@ d3.json('weekly.json', function(err, data) {
 
   // For each array of keys (commits, stars, etc), create a line
   dataNest.forEach(function(d) {
-    svg.append("path")
-      .attr("class", "line")
-      .attr("stroke", color_hash[dataNest.indexOf(d)])
-      .attr("d", line(d.values));
+    svg.append('path')
+      .attr('class', 'line')
+      .attr('stroke', color_hash[dataNest.indexOf(d)])
+      .attr('d', line(d.values))
+      .attr('id', 'tag' + d.key.replace(/\s+/g, ''));
   });
 
   // Initialize Tooltip object
@@ -81,60 +86,68 @@ d3.json('weekly.json', function(err, data) {
   svg.call(tip);
 
   // Create circles around all points
-  var circles = svg.selectAll("circle")
+  var circles = svg.selectAll('circle')
     .data(data)
     .enter()
-    .append("circle");
+    .append('circle');
 
   circles
-    .attr("cx", function (d) { return x(d.date) })
-    .attr("cy", function (d) { return y(d.count) })
-    .attr("r", function (d) { return 5 })
+    .attr('cx', function (d) { return x(d.date) })
+    .attr('cy', function (d) { return y(d.count) })
+    .attr('r', function (d) { return 5 })
+    .attr('id', function (d) { return 'circle' + d.name.replace(/\s+/g, '')})
     .style('stroke', '#917394')
-    .style("fill", '#ffffff' )
+    .style('fill', '#ffffff' )
     .on('mouseover', tip.show)
     .on('mouseout', tip.hide)
 
-
   // Create x-axis
-  svg.append("g")
-    .attr("class", "x axis")
-    .attr("transform", "translate(0," + height + ")")
+  svg.append('g')
+    .attr('class', 'x axis')
+    .attr('transform', 'translate(0,' + height + ')')
     .call(xAxis);
 
   // Create y-axis
-  svg.append("g")
-    .attr("class", "y axis")
+  svg.append('g')
+    .attr('class', 'y axis')
     .call(yAxis);
 
-  // Initialize legend  
-  var legend = svg.append("g")
-    .attr("class", "legend")
-    .attr("x", 500 - 65)
-    .attr("y", 25)
-    .attr("height", 100)
-    .attr("width", 100);
+  // Create Title
+  svg.append('text')
+    .attr('x', (width / 2))             
+    .attr('y', 0 - (margin.top / 2))
+    .attr('text-anchor', 'middle')  
+    .style('font-size', '16px') 
+    .style('text-decoration', 'underline')  
+    .text('Total Activity');
 
-  // Create the legend
-  legend.selectAll('g')
-    .data(dataNest)
-    .enter()
-    .append('g')
-    .each(function(d, i) {
-      var g = d3.select(this);
-      g.append("rect")
-        .attr("x", 500 - 65)
-        .attr("y", i*25)
-        .attr("width", 10)
-        .attr("height", 10)
-        .style("fill", color_hash[String(i)]);
-      
-      g.append("text")
-        .attr("x", 500 - 50)
-        .attr("y", i * 25 + 8)
-        .attr("height",30)
-        .attr("width",100)
-        .style("fill", color_hash[String(i)])
-        .text(legend_hash[String(i)][0]);
-    });
+  // Legend dimensions
+  legendSpace = width/dataNest.length;
+
+  // Loop through each symbol / key
+  dataNest.forEach(function(d,i) {
+    // Add the Legend
+    svg.append('text')                                   
+      .attr('x', (legendSpace/2)+i*legendSpace)
+      .attr('y', height + (margin.bottom/2) + 15)        
+      .attr('class', 'legend') 
+      .style('fill', function() { return color_hash[String(i)] })
+      .on('click', function() {                    
+        var active   = d.active ? false : true,   
+        newOpacity = active ? 0 : 1; 
+
+        // Hide or show the elements based on the ID
+        d3.select('#tag'+ d.key.replace(/\s+/g, '')) 
+          .transition().duration(500)          
+          .style('opacity', newOpacity); 
+
+        d3.selectAll('#circle'+ d.key.replace(/\s+/g, '')) 
+          .transition().duration(500)          
+          .style('opacity', newOpacity);  
+
+        // Update whether or not the elements are active
+        d.active = active;                       
+      })
+      .text(d.key)
+  });
 });
